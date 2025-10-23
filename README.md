@@ -1,11 +1,19 @@
 # Python-logging-properly
 
+TODO:
+
+- Read through and clean up the JSON colouring code
+
+- Make LogSession() context manager
+
+- Make file writer only write when DEV_LOGGING=true (a filter?)
+
 To run the app using native python logging:
 
 ```bash
 cd example_app
 uv run python app.py
-APP_ENV=dev uv run python app.py    # for aesthetic logging in stdout
+DEV_LOGGING=true uv run python app.py    # for aesthetic logging in stdout
 ```
 
 ## Observability

@@ -41,7 +41,7 @@ _RESERVED_LOG_RECORD_ATTRS = frozenset(
 )
 
 LOG_LEVEL_STYLES = {
-    # used to colour logs in stdout when APP_ENV='dev' #
+    # used to colour logs in stdout when DEV_LOGGING='true' #
     "DEBUG": "cyan",
     "INFO": "green",
     "WARNING": "yellow",
@@ -59,7 +59,11 @@ class JsonLogFormatter(logging.Formatter):
     """
 
     def __init__(
-        self, *, fmt_keys: dict[str, str] | None = None, colorize: bool = False
+        self,
+        *,
+        fmt_keys: dict[str, str] | None = None,
+        colourise: bool = False,
+        indent: bool = False,
     ) -> None:
         """Initializes the JsonLogFormatter.
 
@@ -67,12 +71,15 @@ class JsonLogFormatter(logging.Formatter):
             fmt_keys (dict[str, str] | None): A dictionary where keys are the
                 desired names in the JSON output and values are the corresponding
                 attribute names on the `logging.LogRecord` object.
-            colorize (bool): Whether to output colorized JSON. This is only
-                applied when the `APP_ENV` environment variable is set to "dev".
+            colourise (bool, default=False): Whether to output colourful JSON. This is only
+                applied when the `DEV_LOGGING` environment variable is set to "true".
+            indent (bool, default=False): Whether to output indented JSON. This is only
+                applied when the `DEV_LOGGING` environment variable is set to "true".
         """
         super().__init__()
         self.fmt_keys = fmt_keys or {}
-        self.colorize = colorize
+        self.colourise = colourise
+        self.indent = indent
 
     @override
     def format(self, record: logging.LogRecord) -> str:
@@ -86,27 +93,34 @@ class JsonLogFormatter(logging.Formatter):
         """
         structlog: dict[str, Any] = self._create_structlog(record)
 
-        if self.colorize and os.environ.get("APP_ENV") == "dev":
+        if os.environ.get("DEV_LOGGING") == "true":
             console = Console()
-            json_str = json.dumps(structlog, indent=4, default=str)
+            match self.indent:
+                case True:
+                    json_str = json.dumps(structlog, indent=4, default=str)
+                case _:
+                    json_str = json.dumps(structlog, default=str)
+
             text = Text(json_str)
-            JSONHighlighter().highlight(text)
+            if self.colourise:
+                JSONHighlighter().highlight(text)
 
-            level_name = record.levelname
-            if level_style := LOG_LEVEL_STYLES.get(level_name):
-                level_key: str | None = None
-                for key, value in self.fmt_keys.items():
-                    if value == "levelname":
-                        level_key = key
-                        break
+                level_name = record.levelname
+                if level_style := LOG_LEVEL_STYLES.get(level_name):
+                    level_key: str | None = None
+                    for key, value in self.fmt_keys.items():
+                        if value == "levelname":
+                            level_key = key
+                            break
 
-                if level_key:
-                    regex = rf'("{level_key}"\s*:\s*"{level_name}")'
-                    text.highlight_regex(regex, style=level_style)
+                    if level_key:
+                        regex = rf'"{level_key}"\s*:\s*("{level_name}")'
+                        text.highlight_regex(regex, style=level_style)
 
             with console.capture() as capture:
                 console.print(text)
             return capture.get().strip()
+
         return json.dumps(structlog, default=str)
 
     def _create_structlog(

@@ -20,15 +20,18 @@ formatters:
   json:
     "()": src.logging_utils.JsonLogFormatter
     <<: *json_fmt_keys
-  json_color:
+    colourise: false
+    indent: false
+  json_pretty:
     "()": src.logging_utils.JsonLogFormatter
     <<: *json_fmt_keys
-    colorize: true
+    colourise: true
+    indent: true
 handlers:
   stdout:
     class: logging.StreamHandler
     level: INFO
-    formatter: json_color
+    formatter: json_pretty
     stream: ext://sys.stdout
   # stderr:
   #   class: logging.StreamHandler

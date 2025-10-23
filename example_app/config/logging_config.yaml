@@ -3,13 +3,48 @@ disable_existing_loggers: false
 formatters:
   simple:
     format: "%(levelname)s :: %(message)s"
+  json:
+    "()": src.logging_utils.JsonLogFormatter
+    fmt_keys:
+      # https://docs.python.org/3/library/logging.html#logrecord-attributes
+      level: levelname
+      message: message
+      timestamp: timestamp
+      logger_name: name
+      module: module
+      function: funcName
+      # line_num: lineno
+      # thread_name: threadName
+      # asyncio_task_name: taskName
+      exc_info: exc_info
+      stack_info: stack_info
 handlers:
   stdout:
     class: logging.StreamHandler
-    formatter: simple
+    level: INFO
+    formatter: json
     stream: ext://sys.stdout
+  # stderr:
+  #   class: logging.StreamHandler
+  #   level: WARNING
+  #   formatter: json
+  #   stream: ext://sys.stdout
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: json
+    filename: logs/app_logs.jsonl
+    maxBytes: 5242880 # 5Mb
+    backupCount: 6
+  queue_handler:
+    class: logging.handlers.QueueHandler
+    handlers:
+      - stdout
+      # - stderr
+      - file
+    respect_handler_level: true
 loggers:
   root:
     level: DEBUG
     handlers:
-      - stdout
+      - queue_handler

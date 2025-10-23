@@ -58,16 +58,21 @@ class JsonLogFormatter(logging.Formatter):
             `LogRecord` attribute names.
     """
 
-    def __init__(self, *, fmt_keys: dict[str, str] | None = None) -> None:
+    def __init__(
+        self, *, fmt_keys: dict[str, str] | None = None, colorize: bool = False
+    ) -> None:
         """Initializes the JsonLogFormatter.
 
         Args:
             fmt_keys (dict[str, str] | None): A dictionary where keys are the
                 desired names in the JSON output and values are the corresponding
                 attribute names on the `logging.LogRecord` object.
+            colorize (bool): Whether to output colorized JSON. This is only
+                applied when the `APP_ENV` environment variable is set to "dev".
         """
         super().__init__()
         self.fmt_keys = fmt_keys or {}
+        self.colorize = colorize
 
     @override
     def format(self, record: logging.LogRecord) -> str:
@@ -81,30 +86,28 @@ class JsonLogFormatter(logging.Formatter):
         """
         structlog: dict[str, Any] = self._create_structlog(record)
 
-        match os.environ.get("APP_ENV"):
-            case "dev":
-                console = Console()
-                json_str = json.dumps(structlog, indent=4, default=str)
-                text = Text(json_str)
-                JSONHighlighter().highlight(text)
+        if self.colorize and os.environ.get("APP_ENV") == "dev":
+            console = Console()
+            json_str = json.dumps(structlog, indent=4, default=str)
+            text = Text(json_str)
+            JSONHighlighter().highlight(text)
 
-                level_name = record.levelname
-                if level_style := LOG_LEVEL_STYLES.get(level_name):
-                    level_key: str | None = None
-                    for key, value in self.fmt_keys.items():
-                        if value == "levelname":
-                            level_key = key
-                            break
+            level_name = record.levelname
+            if level_style := LOG_LEVEL_STYLES.get(level_name):
+                level_key: str | None = None
+                for key, value in self.fmt_keys.items():
+                    if value == "levelname":
+                        level_key = key
+                        break
 
-                    if level_key:
-                        regex = rf'("{level_key}"\s*:\s*"{level_name}")'
-                        text.highlight_regex(regex, style=level_style)
+                if level_key:
+                    regex = rf'("{level_key}"\s*:\s*"{level_name}")'
+                    text.highlight_regex(regex, style=level_style)
 
-                with console.capture() as capture:
-                    console.print(text)
-                return capture.get().strip()
-            case _:
-                return json.dumps(structlog, default=str)
+            with console.capture() as capture:
+                console.print(text)
+            return capture.get().strip()
+        return json.dumps(structlog, default=str)
 
     def _create_structlog(
         self,

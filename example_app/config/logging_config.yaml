@@ -3,8 +3,7 @@ disable_existing_loggers: false
 formatters:
   simple:
     format: "%(levelname)s :: %(message)s"
-  json:
-    "()": src.logging_utils.JsonLogFormatter
+  json_fmt_keys: &json_fmt_keys
     fmt_keys:
       # https://docs.python.org/3/library/logging.html#logrecord-attributes
       level: levelname
@@ -18,11 +17,18 @@ formatters:
       # asyncio_task_name: taskName
       exc_info: exc_info
       stack_info: stack_info
+  json:
+    "()": src.logging_utils.JsonLogFormatter
+    <<: *json_fmt_keys
+  json_color:
+    "()": src.logging_utils.JsonLogFormatter
+    <<: *json_fmt_keys
+    colorize: true
 handlers:
   stdout:
     class: logging.StreamHandler
     level: INFO
-    formatter: json
+    formatter: json_color
     stream: ext://sys.stdout
   # stderr:
   #   class: logging.StreamHandler

@@ -5,7 +5,11 @@ Logging formatters.
 import datetime as dt
 import json
 import logging
+import os
 from typing import Any, override
+
+from rich.console import Console
+from rich.json import JSON
 
 # from https://docs.python.org/3/library/logging.html#logrecord-attributes
 _RESERVED_LOG_RECORD_ATTRS = frozenset(
@@ -54,6 +58,9 @@ class JsonLogFormatter(logging.Formatter):
         """
         super().__init__()
         self.fmt_keys = fmt_keys or {}
+        # self._dev_mode = os.environ.get("APP_ENV") == "DEV"
+        # if self._dev_mode:
+        #     self._console = Console()
 
     @override
     def format(self, record: logging.LogRecord) -> str:
@@ -66,7 +73,18 @@ class JsonLogFormatter(logging.Formatter):
             str: A JSON string representation of the log record.
         """
         structlog: dict[str, Any] = self._create_structlog(record)
-        return json.dumps(structlog, default=str)
+
+        match os.environ.get("APP_ENV"):
+            case "dev":
+                console = Console()
+                rich_json = JSON(
+                    json.dumps(structlog, indent=4, default=str),
+                )
+                with console.capture() as capture:
+                    console.print(rich_json)
+                return capture.get().strip()
+            case _:
+                return json.dumps(structlog, default=str)
 
     def _create_structlog(
         self,

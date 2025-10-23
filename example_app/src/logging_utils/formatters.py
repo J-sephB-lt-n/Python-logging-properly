@@ -9,7 +9,8 @@ import os
 from typing import Any, override
 
 from rich.console import Console
-from rich.json import JSON
+from rich.highlighter import JSONHighlighter
+from rich.text import Text
 
 # from https://docs.python.org/3/library/logging.html#logrecord-attributes
 _RESERVED_LOG_RECORD_ATTRS = frozenset(
@@ -39,6 +40,15 @@ _RESERVED_LOG_RECORD_ATTRS = frozenset(
     )
 )
 
+LOG_LEVEL_STYLES = {
+    # used to colour logs in stdout when APP_ENV='dev' #
+    "DEBUG": "cyan",
+    "INFO": "green",
+    "WARNING": "yellow",
+    "ERROR": "red",
+    "CRITICAL": "bold red",
+}
+
 
 class JsonLogFormatter(logging.Formatter):
     """A logging formatter that outputs log records as JSON strings.
@@ -58,9 +68,6 @@ class JsonLogFormatter(logging.Formatter):
         """
         super().__init__()
         self.fmt_keys = fmt_keys or {}
-        # self._dev_mode = os.environ.get("APP_ENV") == "DEV"
-        # if self._dev_mode:
-        #     self._console = Console()
 
     @override
     def format(self, record: logging.LogRecord) -> str:
@@ -77,11 +84,24 @@ class JsonLogFormatter(logging.Formatter):
         match os.environ.get("APP_ENV"):
             case "dev":
                 console = Console()
-                rich_json = JSON(
-                    json.dumps(structlog, indent=4, default=str),
-                )
+                json_str = json.dumps(structlog, indent=4, default=str)
+                text = Text(json_str)
+                JSONHighlighter().highlight(text)
+
+                level_name = record.levelname
+                if level_style := LOG_LEVEL_STYLES.get(level_name):
+                    level_key: str | None = None
+                    for key, value in self.fmt_keys.items():
+                        if value == "levelname":
+                            level_key = key
+                            break
+
+                    if level_key:
+                        regex = rf'("{level_key}"\s*:\s*"{level_name}")'
+                        text.highlight_regex(regex, style=level_style)
+
                 with console.capture() as capture:
-                    console.print(rich_json)
+                    console.print(text)
                 return capture.get().strip()
             case _:
                 return json.dumps(structlog, default=str)

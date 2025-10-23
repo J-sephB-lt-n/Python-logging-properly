@@ -1,5 +1,13 @@
 # Python-logging-properly
 
+To run the app using native python logging:
+
+```bash
+cd example_app
+uv run python app.py
+APP_ENV=dev uv run python app.py    # for aesthetic logging in stdout
+```
+
 ## Observability
 
 The book [Observability Engineering](https://www.oreilly.com/library/view/observability-engineering/9781492076438/) describes the _structured event_ as the fundamental unit of observability, required for achieving _observability_ in a system (_observability_, in this context, meaning that you can answer any question about the state of the system using your telemetry data, even questions you did not anticipate before collecting that data). A _structured event_ is an arbitrarily wide set of key/value pairs encoding metadata about the event (e.g. a JSON object or python dict). The book describes the creation of a structured event like this:
@@ -23,9 +31,12 @@ Where a single request (or _transaction_, or other distinct unit of work) contai
 
 I found [this video](https://www.youtube.com/watch?v=9L77QExPmI0) extremely helpful.
 
-Basic principles I'm following:
+Here are my principles/goals:
 
 - Use dictConfig with a JSON or YAML config file (I'm using YAML in this repo).
-- Put all handlers and filters on the root logger only. All other loggers propagate logs to the root logger, which handles them.
-- Don't use the root logger directly in code (use logging.getLogger(**name**)).
--
+- Put all handlers and filters on the root logger only. All other loggers propagate logs to the root logger, which handles them. This will make my handlers/formatters also apply to 3rd party log messages.
+- Don't use the root logger directly in code (use `logging.getLogger(__name__)`).
+- Use ISO-8601 timestamps (with explicit timezone)
+- Do structured logging using a JSON formatter
+- Print indented and colourful logs to STDOUT in a dev environment (but not prod).
+- Don't log on the main app thread (slows down the app too much)

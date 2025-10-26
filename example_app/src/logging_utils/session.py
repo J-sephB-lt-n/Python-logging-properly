@@ -15,26 +15,6 @@ _log_session_vars: ContextVar[MappingProxyType | None] = ContextVar(
 )
 
 
-class AddLogSessionContextVars(logging.Filter):
-    """
-    Filter which adds variables scoped to the log session context
-    into the log record.
-    """
-
-    @override
-    def filter(self, record: logging.LogRecord) -> bool:
-        """TODO."""
-        session_vars: MappingProxyType | None = _log_session_vars.get()
-        if hasattr(record, "log_session"):
-            raise AttributeError(
-                "'log_session' is an attribute name in log records reserved for "
-                + "the log_session() context manager."
-            )
-        if session_vars:
-            record.log_session = dict(session_vars)
-        return True
-
-
 @contextmanager
 def log_session(**kwargs):
     """

@@ -32,8 +32,8 @@ def run_logging_examples():
         )
         log_sess.var3_set_in_context = "foo"
         logger.error("Third example message in log session")
-        log_sess.var3_set_in_context = "ba"
-        log_sess.var4_set_in_context = "ar"
+        log_sess.var4_set_in_context = "ba"
+        log_sess.var5_set_in_context = "ar"
         logger.critical("Fourth example message in log session", extra={"why": "not"})
 
     logger.info("First example message outside of log session.")

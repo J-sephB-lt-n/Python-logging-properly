@@ -1,6 +1,10 @@
 version: 1
 disable_existing_loggers: false
 
+filters:
+  only_if_dev:
+    "()": src.logging_utils.filters.OnlyIfDev
+
 formatters:
   simple:
     format: "%(levelname)s :: %(message)s"
@@ -43,6 +47,8 @@ handlers:
   file:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
+    filters:
+      - only_if_dev
     formatter: json
     filename: logs/app_logs.jsonl
     maxBytes: 5242880 # 5Mb

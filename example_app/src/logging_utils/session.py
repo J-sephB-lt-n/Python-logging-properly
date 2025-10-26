@@ -3,11 +3,9 @@ Code for automatically injecting context-scoped variables into the `extra` attri
 of every logging call within the context.
 """
 
-import logging
 from contextlib import contextmanager, asynccontextmanager
 from contextvars import ContextVar
 from types import MappingProxyType, SimpleNamespace
-from typing import override
 
 _log_session_vars: ContextVar[MappingProxyType | None] = ContextVar(
     "_log_session_vars",

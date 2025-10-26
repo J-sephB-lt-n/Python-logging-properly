@@ -94,15 +94,15 @@ class JsonLogFormatter(logging.Formatter):
         structlog: dict[str, Any] = self._create_structlog(record)
 
         if os.environ.get("DEV_LOGGING") == "true":
-            console = Console()
             match self.indent:
                 case True:
                     json_str = json.dumps(structlog, indent=4, default=str)
                 case _:
                     json_str = json.dumps(structlog, default=str)
 
-            text = Text(json_str)
             if self.colourise:
+                console = Console()
+                text = Text(json_str)
                 JSONHighlighter().highlight(text)
 
                 level_name = record.levelname
@@ -117,9 +117,9 @@ class JsonLogFormatter(logging.Formatter):
                         regex = rf'"{level_key}"\s*:\s*("{level_name}")'
                         text.highlight_regex(regex, style=level_style)
 
-            with console.capture() as capture:
-                console.print(text)
-            return capture.get().strip()
+                with console.capture() as capture:
+                    console.print(text)
+                return capture.get().strip()
 
         return json.dumps(structlog, default=str)
 

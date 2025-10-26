@@ -17,6 +17,7 @@ formatters:
       # asyncio_task_name: taskName
       exc_info: exc_info
       stack_info: stack_info
+      log_session: log_session # I add this custom field to log records
   json:
     "()": src.logging_utils.JsonLogFormatter
     <<: *json_fmt_keys

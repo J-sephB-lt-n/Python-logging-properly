@@ -1,0 +1,42 @@
+"""
+Example usage of the various logging utilities.
+"""
+
+import logging
+
+from src.logging_utils import log_session, setup_logging
+
+
+def run_logging_examples():
+    setup_logging()
+
+    logger = logging.getLogger(__name__)
+
+    logger.debug("This is a debug message", extra={"something extra": "in debug"})
+    logger.info("This is an info message", extra={"something extra": "in info"})
+    logger.warning("This is a warning message", extra={"something extra": "in warning"})
+    logger.error("This is an error message", extra={"something extra": "in error"})
+    logger.critical(
+        "This is a critical message", extra={"something extra": "in critical"}
+    )
+
+    with log_session(
+        var1_in_log_session_init=69,
+        var2_in_log_session_init={"a": "map"},
+    ) as log_sess:
+        logger.info("First example message in log session")
+        logger.warning(
+            "Second example message in log session",
+            extra={"with": ["something", "extra"]},
+        )
+        log_sess.var3_set_in_context = "foo"
+        logger.error("Third example message in log session")
+        log_sess.var3_set_in_context = "ba"
+        log_sess.var4_set_in_context = "ar"
+        logger.critical("Fourth example message in log session", extra={"why": "not"})
+
+    logger.info("First example message outside of log session.")
+
+
+if __name__ == "__main__":
+    run_logging_examples()

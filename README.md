@@ -12,8 +12,8 @@ To run the app using native python logging:
 
 ```bash
 cd example_app
-uv run python app.py
-DEV_LOGGING=true uv run python app.py    # for aesthetic logging in stdout
+uv run python -m src.examples.logging_utils
+DEV_LOGGING=true uv run python -m src.examples.logging_utils
 ```
 
 ## Observability

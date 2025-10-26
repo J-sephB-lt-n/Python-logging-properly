@@ -1,5 +1,10 @@
 version: 1
 disable_existing_loggers: false
+
+filters:
+  log_session:
+    "()": src.logging_utils.session.AddLogSessionContextVars
+
 formatters:
   simple:
     format: "%(levelname)s :: %(message)s"
@@ -28,6 +33,7 @@ formatters:
     <<: *json_fmt_keys
     colourise: true
     indent: true
+
 handlers:
   stdout:
     class: logging.StreamHandler
@@ -56,5 +62,7 @@ handlers:
 loggers:
   root:
     level: DEBUG
+    filters:
+      - log_session
     handlers:
       - queue_handler

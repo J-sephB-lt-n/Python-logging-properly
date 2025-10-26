@@ -1,5 +1,5 @@
 """
-Example usage of the various logging utilities.
+Example usage of the available logging tools.
 """
 
 import logging
@@ -8,6 +8,7 @@ from src.logging_utils import log_session, setup_logging
 
 
 def run_logging_examples():
+    """Example usage of the available logging tools."""
     setup_logging()
 
     logger = logging.getLogger(__name__)

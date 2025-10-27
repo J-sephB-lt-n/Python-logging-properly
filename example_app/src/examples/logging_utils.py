@@ -31,7 +31,7 @@ def run_logging_examples():
             extra={"with": ["something", "extra"]},
         )
         log_sess.var3_set_in_context = "foo"
-        logger.error("Third example message in log session")
+        logger.error("Third example message in log session", stack_info=True)
         log_sess.var4_set_in_context = "ba"
         log_sess.var5_set_in_context = "ar"
         logger.critical("Fourth example message in log session", extra={"why": "not"})

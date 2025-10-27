@@ -1,7 +1,5 @@
 # Python-logging-properly
 
-To run the app using native python logging:
-
 ```bash
 cd example_app
 uv run python -m src.examples.logging_utils

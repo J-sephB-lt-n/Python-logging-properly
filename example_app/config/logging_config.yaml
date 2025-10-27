@@ -20,8 +20,9 @@ formatters:
       line_num: lineno
       # thread_name: threadName
       # asyncio_task_name: taskName
-      # exc_info: exc_info  # these are moved into the message by QueueHandler
-      # stack_info: stack_info # these are moved into the message by QueueHandler
+      # exc_info: exc_info  # moved into `message` by QueueHandler (https://docs.python.org/3/library/logging.handlers.html#queuehandler)
+      # stack_info: stack_info # moved into `message` by QueueHandler (https://docs.python.org/3/library/logging.handlers.html#queuehandler)
+      # exc_text: exc_text # moved into `message` by QueueHandler (https://docs.python.org/3/library/logging.handlers.html#queuehandler)
   json:
     "()": src.logging_utils.JsonLogFormatter
     <<: *json_fmt_keys

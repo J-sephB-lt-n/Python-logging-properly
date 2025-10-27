@@ -19,6 +19,7 @@ _RESERVED_LOG_RECORD_ATTRS = frozenset(
         "asctime",
         "created",
         "exc_info",
+        "exc_text",
         "filename",
         "funcName",
         "levelname",

@@ -20,8 +20,8 @@ formatters:
       line_num: lineno
       # thread_name: threadName
       # asyncio_task_name: taskName
-      exc_info: exc_info
-      stack_info: stack_info
+      # exc_info: exc_info  # these are moved into the message by QueueHandler
+      # stack_info: stack_info # these are moved into the message by QueueHandler
   json:
     "()": src.logging_utils.JsonLogFormatter
     <<: *json_fmt_keys
@@ -52,18 +52,18 @@ handlers:
     formatter: json
     filename: logs/app_logs.jsonl
     maxBytes: 5242880 # 5Mb
-    backupCount: 6
-  # queue_handler:
-  #   class: logging.handlers.QueueHandler
-  #   handlers:
-  #     - stdout
-  #     # - stderr
-  #     - file
-  #   respect_handler_level: true
+    backupCount: 10
+  queue_handler:
+    class: logging.handlers.QueueHandler
+    handlers:
+      - stdout
+      # - stderr
+      - file
+    respect_handler_level: true
 loggers:
   root:
     level: DEBUG
     handlers:
-      - stdout
-      - file
-      # - queue_handler
+      # - stdout
+      # - file
+      - queue_handler

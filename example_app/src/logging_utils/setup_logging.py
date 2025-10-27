@@ -2,7 +2,7 @@
 Functions for global logging setup.
 """
 
-# import atexit
+import atexit
 import logging
 import logging.config
 from pathlib import Path
@@ -37,6 +37,6 @@ def setup_logging() -> None:
 
     logging.setLogRecordFactory(record_factory)
 
-    # queue_handler = logging.getHandlerByName("queue_handler")
-    # queue_handler.listener.start()
-    # atexit.register(queue_handler.listener.stop)
+    queue_handler = logging.getHandlerByName("queue_handler")
+    queue_handler.listener.start()
+    atexit.register(queue_handler.listener.stop)

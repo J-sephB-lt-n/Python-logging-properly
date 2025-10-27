@@ -12,4 +12,5 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ipython>=9.6.0",
+    "wat-inspector>=0.4.3",
 ]

@@ -8,6 +8,27 @@ DEV_LOGGING=true uv run python -m src.examples.logging_utils
 
 ## Observability
 
+Application observability means being able to understand the internal state of the system from it's output alone.
+
+Good observability means that you can answer any question about your system, even questions which you did not anticipate needing to be answered.
+
+Here is what is required for good system observability, and how I have implemented these requirements using native python and OpenTelemetry:
+
+| Requirement                                                                                                       | Native python                                                                      | OpenTelemetry |
+| ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------- |
+| Metrics                                                                                                           |                                                                                    |
+| Structured logs                                                                                                   | Custom JSON log formatter class                                                    |
+| Traces                                                                                                            |                                                                                    |
+| Logs describe _WHO_ performed the action                                                                          |                                                                                    |
+| Logs describe _WHAT_ happened                                                                                     |                                                                                    |
+| Logs describe _WHEN_ the event happened                                                                           | Automatic timestamp field in every log                                             |
+| Logs describe _WHERE_ the event happened                                                                          | Automatically populate each log using the LogRecord factory                        |
+| Logs describe _WHY_ (the reason) the event happened                                                               | Enforce a `reason` attribute required in every log message (or raise an Exception) |
+| Everything must be linkable to everything (shared IDs). Metrics, logs and traces to themselves and to each other. | `log_session` context manager                                                      |
+| Logs and traces are easily searched/filtered                                                                      | Consistent log formatting using custom JSONFormatter class                         |               |
+| Metrics/Logging/Tracing doesn't affect app performance                                                            | Use a QueueHandler                                                                 |               |
+| Context propagation                                                                                               | Pass the `log_session` context manager object around                               |               |
+
 The book [Observability Engineering](https://www.oreilly.com/library/view/observability-engineering/9781492076438/) describes the _structured event_ as the fundamental unit of observability, required for achieving _observability_ in a system (_observability_, in this context, meaning that you can answer any question about the state of the system using your telemetry data, even questions you did not anticipate before collecting that data). A _structured event_ is an arbitrarily wide set of key/value pairs encoding metadata about the event (e.g. a JSON object or python dict). The book describes the creation of a structured event like this:
 
 ```
@@ -24,6 +45,29 @@ That’s a structured event.
 ```
 
 Where a single request (or _transaction_, or other distinct unit of work) contains
+
+## Good attributes for a structured log event to have
+
+- timestamp
+- request duration
+- message/description
+- status (SUCCESS, FAILURE, HTTP CODE etc.)
+- app_id
+- user_id
+- project_id
+- org_id
+- service ID
+- service version
+- machine ID
+- region
+- library/module
+- script name, function name, line number
+- trace ID, trace name, span ID, span name, parent span ID
+- transaction ID
+
+## Traces are Logs
+
+Traces are just logs (structured events) linkable by shared IDs.
 
 ## Native Python Logging
 

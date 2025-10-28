@@ -7,7 +7,7 @@ filters:
 
 formatters:
   simple:
-    format: "%(levelname)s :: %(message)s"
+    format: "%(asctime)s | %(levelname)-8s | %(name)s | %(filename)s:%(lineno)d | %(funcName)s() | %(message)s"
   json_fmt_keys: &json_fmt_keys
     fmt_keys:
       # https://docs.python.org/3/library/logging.html#logrecord-attributes
@@ -65,6 +65,4 @@ loggers:
   root:
     level: DEBUG
     handlers:
-      # - stdout
-      # - file
       - queue_handler

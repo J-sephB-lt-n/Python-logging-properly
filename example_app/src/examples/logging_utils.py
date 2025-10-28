@@ -2,9 +2,11 @@
 Example usage of the available logging tools.
 """
 
+import json
 import logging
 
 from src.logging_utils import log_session, setup_logging
+from .services import imagine_this_is_an_http_request, some_function
 
 
 def run_logging_examples():
@@ -22,7 +24,7 @@ def run_logging_examples():
     )
 
     with log_session(
-        var1_in_log_session_init=69,
+        session_id=69420,
         var2_in_log_session_init={"a": "map"},
     ) as log_sess:
         logger.info("First example message in log session")
@@ -35,6 +37,20 @@ def run_logging_examples():
         log_sess.var4_set_in_context = "ba"
         log_sess.var5_set_in_context = "ar"
         logger.critical("Fourth example message in log session", extra={"why": "not"})
+
+        return_val: str = some_function()
+        logger.info(
+            "Finished request to some function",
+            extra={"func_return_value": return_val},
+        )
+
+        status: bool = imagine_this_is_an_http_request(
+            parent_log_session=json.dumps(log_sess.__dict__),
+        )
+        logger.info(
+            "Finished request to some external service",
+            extra={"request_status": status},
+        )
 
         try:
             print(1 / 0)

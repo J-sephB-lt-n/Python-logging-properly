@@ -38,7 +38,7 @@ def run_logging_examples():
         log_sess.var5_set_in_context = "ar"
         logger.critical("Fourth example message in log session", extra={"why": "not"})
 
-        return_val: str = some_function()
+        return_val: str = some_function()  # this func contains its own log_session()
         logger.info(
             "Finished request to some function",
             extra={"func_return_value": return_val},

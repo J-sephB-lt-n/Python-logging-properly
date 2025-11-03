@@ -1,6 +1,4 @@
-"""
-Logging formatters.
-"""
+"""Custom logging formatters."""
 
 import datetime as dt
 import json
@@ -12,8 +10,8 @@ from rich.console import Console
 from rich.highlighter import JSONHighlighter
 from rich.text import Text
 
-# from https://docs.python.org/3/library/logging.html#logrecord-attributes
 _RESERVED_LOG_RECORD_ATTRS = frozenset(
+    # from https://docs.python.org/3/library/logging.html#logrecord-attributes
     (
         "args",
         "asctime",
@@ -42,7 +40,7 @@ _RESERVED_LOG_RECORD_ATTRS = frozenset(
 )
 
 LOG_LEVEL_STYLES = {
-    # used to colour logs in stdout when DEV_LOGGING='true' #
+    # used to colour logs in stdout when DEV_LOGGING=true #
     "DEBUG": "cyan",
     "INFO": "green",
     "WARNING": "yellow",
@@ -52,12 +50,7 @@ LOG_LEVEL_STYLES = {
 
 
 class JsonLogFormatter(logging.Formatter):
-    """A logging formatter that outputs log records as JSON strings.
-
-    Attributes:
-        fmt_keys (dict[str, str]): A dictionary mapping output JSON keys to
-            `LogRecord` attribute names.
-    """
+    """A logging formatter that outputs log records as JSON strings."""
 
     def __init__(
         self,
@@ -66,7 +59,8 @@ class JsonLogFormatter(logging.Formatter):
         colourise: bool = False,
         indent: bool = False,
     ) -> None:
-        """Initializes the JsonLogFormatter.
+        """
+        Initializes the JsonLogFormatter.
 
         Args:
             fmt_keys (dict[str, str] | None): A dictionary where keys are the
@@ -84,22 +78,14 @@ class JsonLogFormatter(logging.Formatter):
 
     @override
     def format(self, record: logging.LogRecord) -> str:
-        """Formats a log record into a JSON string.
-
-        Args:
-            record (logging.LogRecord): The log record to format.
-
-        Returns:
-            str: A JSON string representation of the log record.
-        """
+        """Formats `record` into a JSON string."""
         structlog: dict[str, Any] = self._create_structlog(record)
 
         if os.environ.get("DEV_LOGGING") == "true":
-            match self.indent:
-                case True:
-                    json_str = json.dumps(structlog, indent=4, default=str)
-                case _:
-                    json_str = json.dumps(structlog, default=str)
+            if self.indent:
+                json_str = json.dumps(structlog, indent=4)
+            else:
+                json_str = json.dumps(structlog)
 
             if self.colourise:
                 console = Console()
@@ -115,30 +101,25 @@ class JsonLogFormatter(logging.Formatter):
                             break
 
                     if level_key:
-                        regex = rf'"{level_key}"\s*:\s*("{level_name}")'
-                        text.highlight_regex(regex, style=level_style)
+                        text.highlight_regex(
+                            rf'"{level_key}"\s*:\s*("{level_name}")',
+                            style=level_style,
+                        )
 
                 with console.capture() as capture:
                     console.print(text)
                 return capture.get().strip()
 
-        return json.dumps(structlog, default=str)
+        return json.dumps(structlog)
 
     def _create_structlog(
         self,
         record: logging.LogRecord,
     ) -> dict[str, Any]:
-        """Creates a dictionary from a log record for JSON serialization.
-
-        Any extra attributes passed to the logger will be automatically included.
-
-        Args:
-            record (logging.LogRecord): The log record to process.
-
-        Returns:
-            dict[str, Any]: A dictionary containing the structured log information.
         """
-
+        Creates a dictionary from a log record for JSON serialization.
+        Any extra attributes passed to the logger are automatically included.
+        """
         # certain log record attributes require special treatment #
         special_attrs: dict[str, Any] = {}
         special_attrs["message"] = record.getMessage()
@@ -157,7 +138,7 @@ class JsonLogFormatter(logging.Formatter):
             if attr_name in special_attrs:
                 structlog[out_name] = special_attrs[attr_name]
             else:
-                structlog[out_name] = getattr(record, attr_name, None)
+                structlog[out_name] = getattr(record, attr_name)
 
         # Add any "extra" attributes from the log record. These are attributes
         # that are not part of the standard LogRecord and were not already

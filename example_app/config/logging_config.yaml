@@ -61,6 +61,7 @@ handlers:
       # - stderr
       - file
     respect_handler_level: true
+
 loggers:
   root:
     level: DEBUG

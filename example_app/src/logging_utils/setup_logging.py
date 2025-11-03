@@ -34,16 +34,7 @@ def setup_logging() -> None:
 
     def record_factory(*args, **kwargs):
         record = old_record_factory(*args, **kwargs)
-        session_vars: MappingProxyType | None = _log_session_vars.get()
-        if session_vars:
-            for key, value in session_vars.items():
-                if hasattr(record, key):
-                    raise AttributeError(
-                        f"Cannot overwrite existing attribute '{key}' on log record."
-                    )
-                setattr(record, key, value)
-
-        _add_system_metrics(record)
+        _enrich_log_record(record)
         return record
 
     logging.setLogRecordFactory(record_factory)
@@ -53,8 +44,19 @@ def setup_logging() -> None:
     atexit.register(queue_handler.listener.stop)
 
 
-def _add_system_metrics(record) -> None:
-    """Enrich `record` with available OS and system metrics."""
+def _enrich_log_record(record) -> None:
+    """Enrich `record` with available useful metrics."""
+    # log_session() variables #
+    session_vars: MappingProxyType | None = _log_session_vars.get()
+    if session_vars:
+        for key, value in session_vars.items():
+            if hasattr(record, key):
+                raise AttributeError(
+                    f"Cannot overwrite existing attribute '{key}' on log record."
+                )
+            setattr(record, key, value)
+
+    # system metrics #
     record.pid = os.getpid()
     record.ppid = os.getppid()
     record.hostname = _HOSTNAME

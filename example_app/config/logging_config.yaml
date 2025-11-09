@@ -11,13 +11,17 @@ formatters:
   json_fmt_keys: &json_fmt_keys
     fmt_keys:
       # https://docs.python.org/3/library/logging.html#logrecord-attributes
+      # (there are many more not shown here)
       level: levelname
       message: message
       timestamp: timestamp
       logger_name: name
       module: module
+      calling_script: pathname
       function: funcName
       line_num: lineno
+      process_id: process
+      # thread_id: thread
       # thread_name: threadName
       # asyncio_task_name: taskName
       # exc_info: exc_info  # moved into `message` by QueueHandler (https://docs.python.org/3/library/logging.handlers.html#queuehandler)

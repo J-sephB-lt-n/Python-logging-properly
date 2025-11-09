@@ -57,7 +57,6 @@ def _enrich_log_record(record) -> None:
             setattr(record, key, value)
 
     # system metrics #
-    record.pid = os.getpid()
     record.ppid = os.getppid()
     record.hostname = _HOSTNAME
     # record.ip_address = socket.gethostbyname(socket.gethostname())
